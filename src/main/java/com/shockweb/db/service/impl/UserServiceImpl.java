@@ -44,7 +44,9 @@ public class UserServiceImpl implements UserService {
 //    getAllAddresses(String username)
 //    setNewUser(UserDTO newUser)
 //    setNewAddress(String username, AddressDTO newAddress)
+
 //TODO:    updateUser(UserDTO updatedUser) full update
+
 //TODO:    updateUser(String username, enum field name, <> newValue) partial update
 //TODO:    updateAddress(String username, AddressDTO newAddress) PATCH + PUT
 //TODO:    setDefaultAddress(String username, long addressId)
@@ -137,10 +139,22 @@ public class UserServiceImpl implements UserService {
 
 
 
+    // update user fully
+    @Override
+    public void updateUser(String email, UserDto updatedUser) {
+        // Check if user with the email exists
+        UserEntity userEntity = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User with email " + email + " not found."));
 
+        // Map UserDto to UserEntity
+        UserEntity updatedUserEntity = userMapper.mapFrom(updatedUser);
 
+        // Set the email so that it is not changed
+        updatedUserEntity.setEmail(email);
 
-
+        // Save the updated user
+        userRepository.save(updatedUserEntity);
+    }
 
 
 }

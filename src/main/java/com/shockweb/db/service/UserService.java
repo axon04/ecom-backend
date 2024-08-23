@@ -11,5 +11,6 @@ public interface UserService {
     List<AddressDto> getAllAddressesByEmail(String email);
     void saveNewUser(UserDto newUser);
     void saveNewAddress(String email, AddressDto newAddress);
+    void updateUser(String email, UserDto updatedUser);
 
 }
