@@ -1,0 +1,66 @@
+package com.shockweb.db.service;
+
+import com.shockweb.db.entity.Address;
+import com.shockweb.db.entity.User;
+import com.shockweb.db.entity.UserAddress;
+import com.shockweb.db.repository.AddressRepository;
+import com.shockweb.db.repository.UserAddressRepository;
+import com.shockweb.db.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserAddressRepository userAddressRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
+
+    // Create new userEntity
+    public User createNewUser(User userEntity) {
+        return userRepository.save(userEntity);
+    }
+
+    // Create new address
+    public Address createNewAddress(Address address) {
+        return addressRepository.save(address);
+    }
+
+    public void setAddressForUser(User userEntity, Address address) {
+        Address savedAddress = addressRepository.save(address);
+        UserAddress userAddress = new UserAddress();
+        userAddress.setUser(userEntity);
+        userAddress.setAddress(savedAddress);
+        userAddressRepository.save(userAddress);
+    }
+
+    public List<Address> getAddressesForUser(User userEntity) {
+        List<UserAddress> userAddresses = userAddressRepository.findByUser(userEntity);
+        List<Address> addresses = new ArrayList<>();
+        for (UserAddress userAddress : userAddresses) {
+            addresses.add(userAddress.getAddress());
+        }
+        return addresses;
+    }
+
+}
+
+
+//		User newUser = new User(90, "Kaustabh", "Basu", "kbasu@gmail.com", 98765, "mypass", true, true);
+//		User newUser = new User(90, "Niladri", "Chakraborty", "nilgaming999@gmail.com", 98677, "passpass", true, false);
+//		System.out.println(userService.createNewUser(newUser));
+
+//		Address newAddress = new Address(5, "k1", "321 Pine St", "", "Phoenix", "AZ", 85001, "USA");
+//		Address newAddress = new Address(6, "k2", "901 Maple St", "", "Philadelphia", "PA", 19102, "USA");
+//		Address newAddress = new Address(7, "k3", "234 Cedar St", "", "San Antonio", "TX", 78205, "USA");
+//		Address newAddress = new Address(8, "n1", "567 Spruce St", "", "San Diego", "CA", 92101, "USA");
+//		Address newAddress = new Address(9, "n2", "890 Fir St", "", "Dallas", "TX", 75201, "USA");
+//		Address newAddress = new Address(10, "n3", "345 Cypress St", "", "San Jose", "CA", 95101, "USA");
