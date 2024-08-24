@@ -23,7 +23,7 @@ public class DbApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		//==============================================================================================================
-//		// create a userdto object
+		// create a userdto object
 //		UserDto newUser = new UserDto();
 //		newUser.setFirstName("John");
 //		newUser.setLastName("Doe");
@@ -59,8 +59,24 @@ public class DbApplication implements CommandLineRunner {
 
 		// ==============================================================================================================
 		// get all addresses by email
-		List<AddressDto> addresses = userService.getAllAddressesByEmail("johndoe@gmail.com");
-		System.out.println(addresses);
+//		List<AddressDto> addresses = userService.getAllAddressesByEmail("johndoe@gmail.com");
+//		System.out.println(addresses);
+		//==============================================================================================================
+
+		//==============================================================================================================
+//		// update user
+//		// create a sample dto for updating a user
+//		UserDto updatedUser = new UserDto();
+//		updatedUser.setFirstName("Jonathan");
+//		updatedUser.setLastName("Doe");
+//		updatedUser.setEmail("johndoe@gmail.com");
+//		updatedUser.setPhone(1234567990);
+//		updatedUser.setPassword("betterpass");
+//
+//		userService.updateUser("johndoe@gmail.com", updatedUser);
+		//==============================================================================================================
+
+		//==============================================================================================================
 
 		//==============================================================================================================
 	}

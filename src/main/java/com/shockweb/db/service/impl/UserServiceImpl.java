@@ -44,8 +44,7 @@ public class UserServiceImpl implements UserService {
 //    getAllAddresses(String username)
 //    setNewUser(UserDTO newUser)
 //    setNewAddress(String username, AddressDTO newAddress)
-
-//TODO:    updateUser(UserDTO updatedUser) full update
+//    updateUser(UserDTO updatedUser) full update
 
 //TODO:    updateUser(String username, enum field name, <> newValue) partial update
 //TODO:    updateAddress(String username, AddressDTO newAddress) PATCH + PUT
@@ -150,6 +149,7 @@ public class UserServiceImpl implements UserService {
         UserEntity updatedUserEntity = userMapper.mapFrom(updatedUser);
 
         // Set the email so that it is not changed
+        updatedUserEntity.setId(userEntity.getId());
         updatedUserEntity.setEmail(email);
 
         // Save the updated user
