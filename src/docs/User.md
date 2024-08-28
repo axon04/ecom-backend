@@ -5,38 +5,36 @@
 
 Service responsible for following actions:  
 
-- Getting the details of a userEntity
-- Editing the userEntity details 
-- Add new userEntity address
-- Delete userEntity address
-- Changing default address
-- Getting default address
-- Get list of all address
+- Getting the details of a user
+- Creating a new user
+- Editing the user details fully and partially
+- Get list of all addresses of a user
+- Add new address to a user
+- Edit address of a user fully and partially
+- Delete address of a user
 
 **UserRepository**: Responsible for managing userEntity details only.  
-**AddressRepository**: Responsible for managing addresses only.  
-**UserAddressRepository**: Responsible for mapping addresses to a userEntity.
+**AddressRepository**: Responsible for managing addresses only.
 
 The UserService will be the only exposed service to the presentation layer.  
-The AddressService will be responsible for adding, editing, removing and mapping the addresses to a userEntity. The AddressService will use both AddressRepository and UserAddressRepository.  
+The UserService will interact with the UserRepository and AddressRepository to manage the required data.  
 
 #### Constraints:
 
-- A userEntity cannot be created without an address.
-- A userEntity can delete the address after creation, but will require address when ordering.
-
-### DTO
-
-- UserDTO: UserEntity + Default Address
-- AddressDTO: UserId + List of Addresses
+- A user cannot be created without an address. 
+- A user can have multiple addresses.
+- Addresses can be deleted after creation of user.
 
 ---
 
 ### Methods
 
-- `getUserByUsername(String username)`  
-- `getDefaultAddress(String username)`  
-- `getAllAddresses(String username)`  
-- `setNewUser(UserDTO newUser)`  
-- `setNewAddress(AddressDTO newAddress)`  
+- `UserDto getUserByEmail(String email)`  
+- `List<AddressDto> getAllAddressesByEmail(String email)`  
+- `UserDto saveNewUser(UserDto newUser, AddressDto newAddress)`  
+- `void saveNewAddress(String email, AddressDto newAddress)`  
+- `UserDto updateUser(String email, UserDto updatedUser)` - for partial update leave the fields that you don't want to update as null
+- `AddressDto updateAddress(String email, long addressId, AddressDto newAddress)` - pass null(Object) and 0(int, long) to the fields that you don't want to update  
+- `void deleteUser(String email)`  
+- `void deleteAddress(String email, long addressId)`   
 

@@ -1,20 +1,22 @@
 package com.shockweb.db.service.impl;
 
-import com.shockweb.db.domain.dto.AddressDto;
-import com.shockweb.db.domain.dto.UserDto;
-import com.shockweb.db.domain.entity.AddressEntity;
-import com.shockweb.db.domain.entity.UserAddressEntity;
-import com.shockweb.db.domain.entity.UserEntity;
+import com.shockweb.db.domain.dto.user.AddressDto;
+import com.shockweb.db.domain.dto.user.UserDto;
+import com.shockweb.db.domain.entity.user.AddressEntity;
+import com.shockweb.db.domain.entity.user.UserEntity;
 import com.shockweb.db.mapper.Mapper;
+import com.shockweb.db.mapper.impl.AddressMapperImpl;
+import com.shockweb.db.mapper.impl.UserMapperImpl;
 import com.shockweb.db.repository.AddressRepository;
-import com.shockweb.db.repository.UserAddressRepository;
 import com.shockweb.db.repository.UserRepository;
 import com.shockweb.db.service.UserService;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -24,137 +26,197 @@ public class UserServiceImpl implements UserService {
 
     private final Mapper<AddressEntity, AddressDto> addressMapper;
     private final AddressRepository addressRepository;
-    private final UserAddressRepository userAddressRepository;
+    private final UserMapperImpl userMapperImpl;
+    private final AddressMapperImpl addressMapperImpl;
 
     public UserServiceImpl(UserRepository userRepository,
                            Mapper<UserEntity, UserDto> userMapper,
-                           Mapper<AddressEntity, AddressDto> addressMapper,
                            AddressRepository addressRepository,
-                           UserAddressRepository userAddressRepository) {
+                           Mapper<AddressEntity, AddressDto> addressMapper,
+                           UserMapperImpl userMapperImpl,
+                           AddressMapperImpl addressMapperImpl) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.addressMapper = addressMapper;
         this.addressRepository = addressRepository;
-        this.userAddressRepository = userAddressRepository;
+        this.userMapperImpl = userMapperImpl;
+        this.addressMapperImpl = addressMapperImpl;
     }
 
 
-//    getUserByUsername(String username)
-//    getDefaultAddress(String username)
-//    getAllAddresses(String username)
-//    setNewUser(UserDTO newUser)
-//    setNewAddress(String username, AddressDTO newAddress)
-//    updateUser(UserDTO updatedUser) full update
+//    getUserByEmail(String username)
+//    saveNewUser(UserDTO newUser)
+//    updateUser(UserDTO updatedUser) full update, partial update
+//    getAllAddressesByEmail(String username)
+//    saveNewAddress(String username, AddressDTO newAddress)
+//    deleteUser(String username)
+//    updateAddress(String username, AddressDTO newAddress) PATCH + PUT
+//    deleteAddress(String username, long addressId
 
-//TODO:    updateUser(String username, enum field name, <> newValue) partial update
-//TODO:    updateAddress(String username, AddressDTO newAddress) PATCH + PUT
+//TODO:    getDefaultAddress(String username)
 //TODO:    setDefaultAddress(String username, long addressId)
-//TODO:    deleteUser(String username)
-//TODO:    deleteAddress(String username, long addressId
-
-    // get user by email
+/*
+Update address requires the address id to be passed in the request body. This will cause security issues directly exposing the address id to the client.
+Instead, the address id should be fetched from the database using the user id . This will prevent the client from directly manipulating the address id.
+But this will require an additional database call to fetch the address id.
+This will increase the response time of the API.
+ */
+    // get user by email (this gives address null)
     @Override
     public UserDto getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .map(userMapper::mapTo)
-                .orElseThrow(() -> new IllegalArgumentException("User with email " + email + " not found."));
-    }
 
-
-    // get default address by email
-    @Override
-    public AddressDto getDefaultAddressByEmail(String email) {
+        // check if user exists
         UserEntity userEntity = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email " + email + " not found."));
-
-        UserAddressEntity userAddressEntity = userAddressRepository.findByUserEntityAndIsDefault(userEntity, true)
-                .orElseThrow(() -> new IllegalArgumentException("Default address for user with email " + email + " not found."));
-
-        return addressMapper.mapTo(userAddressEntity.getAddressEntity());
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        // return the user
+        return userMapper.toDto(userEntity);
     }
-
-
 
     // get all addresses by email
     @Override
+    @Transactional
     public List<AddressDto> getAllAddressesByEmail(String email) {
+        // check if user exists
         UserEntity userEntity = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email " + email + " not found."));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<UserAddressEntity> userAddressEntities = userAddressRepository.findAllByUserEntity(userEntity);
-        return userAddressEntities.stream()
-                .map(userAddressEntity -> addressMapper.mapTo(userAddressEntity.getAddressEntity()))
-                .toList();
+        List<AddressDto> addressDtos =  new ArrayList<>();
+
+        // map the addresses to address dtos using foreach and lambda
+        userEntity.getAddress().forEach(address -> {
+            addressDtos.add(addressMapper.toDto(address));
+        });
+
+        // return the addresses
+        return addressDtos;
     }
-
-
 
     // save new user
     @Override
     @Transactional
-    public void saveNewUser(UserDto newUser) {
-        // Check if user with the same email already exists
+    public UserDto saveNewUser(UserDto newUser, AddressDto newAddress) {
+        // check if user exists
         if (userRepository.findByEmail(newUser.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("User with email " + newUser.getEmail() + " already exists.");
+            throw new RuntimeException("User already exists");
         }
 
-        // Map UserDto to UserEntity and AddressDto to AddressEntity
-        UserEntity userEntity = userMapper.mapFrom(newUser);
-        AddressEntity defaultAddress = addressMapper.mapFrom(newUser.getDefaultAddress());
+        // map the address dto to address entity and save the address
+        AddressEntity savedAddress = addressRepository.save(addressMapper.toEntity(newAddress));
 
-        // Save the new user
+        log.info("Saved address: {}", savedAddress);
+
+        // map the user dto to user entity
+        UserEntity userEntity = userMapper.toEntity(newUser);
+
+        // set the address to the user
+        userEntity.setAddress(List.of(savedAddress));
+
+        log.info("UserEntity: {}", userEntity);
+
+        // save the user
         UserEntity savedUser = userRepository.save(userEntity);
-        AddressEntity savedAddress = addressRepository.save(defaultAddress);
-        UserAddressEntity addressLink = UserAddressEntity.builder()
-                .userEntity(savedUser)
-                .addressEntity(savedAddress)
-                .isDefault(true)
-                .build();
-        userAddressRepository.save(addressLink);
+        // return the saved user
+        return userMapper.toDto(savedUser);
     }
 
+    // update user (full update)
+    @Override
+    @Transactional
+    public UserDto updateUser(String email, UserDto updatedUser) {
+        // check if user exists
+        UserEntity userEntity = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // map the updated user dto to user entity
+        UserEntity updatedUserEntity = userMapper.toEntity(updatedUser);
 
+        // map the non-null fields of the updated user entity to the user entity
+        userMapperImpl.mapNonNullFields(updatedUserEntity, userEntity);
+
+        // save the updated user entity
+        UserEntity savedUser = userRepository.save(userEntity);
+
+        // return the updated user
+        return userMapper.toDto(savedUser);
+    }
 
     @Override
     @Transactional
     public void saveNewAddress(String email, AddressDto newAddress) {
-        // Check if user with the email exists
+
+        // check if user exists
         UserEntity userEntity = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email " + email + " not found."));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Map AddressDto to AddressEntity
-        AddressEntity addressEntity = addressMapper.mapFrom(newAddress);
+        // save the address
+        AddressEntity savedAddress = addressRepository.save(addressMapper.toEntity(newAddress));
 
-        // Save the new address
-        AddressEntity savedAddress = addressRepository.save(addressEntity);
-        UserAddressEntity addressLink = UserAddressEntity.builder()
-                .userEntity(userEntity)
-                .addressEntity(savedAddress)
-                .isDefault(false)
-                .build();
-        userAddressRepository.save(addressLink);
+        // add the address to the user
+        userEntity.getAddress().add(savedAddress);
+
+        // save the user
+        userRepository.save(userEntity);
+
     }
 
-
-
-    // update user fully
+    // update address (full + partial update)
     @Override
-    public void updateUser(String email, UserDto updatedUser) {
-        // Check if user with the email exists
+    @Transactional
+    public AddressDto updateAddress(String email, long addressId, AddressDto newAddress) {
+        // check if user exists
         UserEntity userEntity = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with email " + email + " not found."));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Map UserDto to UserEntity
-        UserEntity updatedUserEntity = userMapper.mapFrom(updatedUser);
+        // Retrieve the address to be updated
+        List<AddressEntity> addresses = userEntity.getAddress();
+        AddressEntity addressToUpdate = addresses.stream()
+                .filter(address -> Long.compare(address.getId(), addressId) == 0)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Address not found"));
 
-        // Set the email so that it is not changed
-        updatedUserEntity.setId(userEntity.getId());
-        updatedUserEntity.setEmail(email);
+        // Update the address
+        addressMapperImpl.mapNonNullFields(addressMapper.toEntity(newAddress), addressToUpdate);
 
-        // Save the updated user
-        userRepository.save(updatedUserEntity);
+        // Save the updated address to the database
+        UserEntity updatedUser = userRepository.save(userEntity);
+        return updatedUser.getAddress().stream()
+                .filter(address -> Long.compare(address.getId(), addressId) == 0)
+                .map(addressMapper::toDto)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Address not found"));
     }
 
+    @Override
+    @Transactional
+    public void deleteUser(String email) {
+
+        // Check if user with the same email already exists
+        if (userRepository.findByEmail(email).isEmpty()) {
+            throw new IllegalArgumentException("User with email " + email + " does not exist.");
+        }
+
+        userRepository.deleteByEmail(email);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAddress(String email, long addressId) {
+
+        // check if user exists
+        UserEntity userEntity = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Retrieve the address to be updated
+        List<AddressEntity> addresses = userEntity.getAddress();
+        AddressEntity addressToDelete = addresses.stream()
+                .filter(address -> Long.compare(address.getId(), addressId) == 0)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Address not found"));
+
+        // delete the address
+        addressRepository.delete(addressToDelete);
+        userEntity.getAddress().remove(addressToDelete);
+        userRepository.save(userEntity);
+    }
 
 }
