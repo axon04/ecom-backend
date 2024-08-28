@@ -1,6 +1,6 @@
 package com.shockweb.db.repository;
 
-import com.shockweb.db.domain.entity.user.UserEntity;
+import com.shockweb.db.domain.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

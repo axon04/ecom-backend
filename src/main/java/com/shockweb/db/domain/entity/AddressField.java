@@ -1,4 +1,4 @@
-package com.shockweb.db.domain.entity.user;
+package com.shockweb.db.domain.entity;
 
 public enum AddressField {
     FIRST_LINE("firstLine"),

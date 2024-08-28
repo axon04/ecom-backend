@@ -1,7 +1,7 @@
 package com.shockweb.db.mapper.impl;
 
-import com.shockweb.db.domain.dto.user.UserDto;
-import com.shockweb.db.domain.entity.user.UserEntity;
+import com.shockweb.db.domain.dto.UserDto;
+import com.shockweb.db.domain.entity.UserEntity;
 import com.shockweb.db.mapper.Mapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;

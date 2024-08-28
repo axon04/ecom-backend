@@ -1,11 +1,10 @@
 package com.shockweb.db;
 
-import com.shockweb.db.domain.dto.user.AddressDto;
-import com.shockweb.db.domain.dto.user.UserDto;
+import com.shockweb.db.domain.dto.AddressDto;
+import com.shockweb.db.domain.dto.UserDto;
 import com.shockweb.db.service.UserService;
 import com.shockweb.db.testdata.TestData;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

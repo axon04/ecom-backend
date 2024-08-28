@@ -1,9 +1,9 @@
 package com.shockweb.db.service.impl;
 
-import com.shockweb.db.domain.dto.user.AddressDto;
-import com.shockweb.db.domain.dto.user.UserDto;
-import com.shockweb.db.domain.entity.user.AddressEntity;
-import com.shockweb.db.domain.entity.user.UserEntity;
+import com.shockweb.db.domain.dto.AddressDto;
+import com.shockweb.db.domain.dto.UserDto;
+import com.shockweb.db.domain.entity.AddressEntity;
+import com.shockweb.db.domain.entity.UserEntity;
 import com.shockweb.db.mapper.Mapper;
 import com.shockweb.db.mapper.impl.AddressMapperImpl;
 import com.shockweb.db.mapper.impl.UserMapperImpl;

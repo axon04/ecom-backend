@@ -1,9 +1,6 @@
 package com.shockweb.db.domain.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
@@ -20,12 +17,14 @@ public class UserDto {
 
     private String lastName;
 
+    // prevent setter method from being generated
+    @Setter(AccessLevel.NONE)
     private String email;
 
     private int phone;
 
     private String password;
 
-    private AddressDto defaultAddress;
+    private AddressDto address;
 
 }

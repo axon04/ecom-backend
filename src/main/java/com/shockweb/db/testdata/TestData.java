@@ -1,7 +1,7 @@
 package com.shockweb.db.testdata;
 
-import com.shockweb.db.domain.dto.user.AddressDto;
-import com.shockweb.db.domain.dto.user.UserDto;
+import com.shockweb.db.domain.dto.AddressDto;
+import com.shockweb.db.domain.dto.UserDto;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -12,5 +12,5 @@ When mapping a DTO to an entity, only the non-null fields of the DTO should be m
 
 ### LazyInitializationException
 
-failed to lazily initialize a collection of role: com.shockweb.db.domain.entity.user.UserEntity.address: could not initialize proxy - no Session.
+failed to lazily initialize a collection of role: com.shockweb.db.domain.entity.UserEntity.address: could not initialize proxy - no Session.
 > Fixed with `@Transactional` on the service method.
